@@ -1,0 +1,20 @@
+name: fmo_manual_collection
+channels:
+- anaconda
+- conda-forge
+dependencies:
+- python=3.8
+- pandas==1.0.5
+- numpy==1.18.5
+- tqdm==4.47.0
+- jupyter===1
+- jupyterlab==3 #2.1.5 => now update to 3 which embeds debugger
+- ipykernel=5.3.4  
+- libiconv==1.15
+- nodejs==10.13.0
+- matplotlib==3.3.1
+- seaborn==0.11.0
+- jupyterlab_widgets
+- ipywidgets
+- ipysheet
+- lxml

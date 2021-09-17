@@ -1,4 +1,3 @@
-from numpy.lib.npyio import load
 import pandas as pd
 import numpy as np
 import matplotlib.pylab as plt
@@ -9,7 +8,6 @@ from pprint import pprint
 from tqdm import tqdm
 import logging
 
-import config as cfg
 import ipywidgets as widgets
 import ipysheet 
 import os, io, json
@@ -100,7 +98,9 @@ class Dashboard:
         self.df = pd.DataFrame()
         self.df_brackets = pd.DataFrame(brackets_alias, columns = ['fmo', 'alias'])
 
-    def set_parameters(self, year=None, dir_fmo_manual_items=cfg.DIR_DATA_FMO_MANUAL_ITEMS):
+    def set_parameters(self, year=None, dir_fmo_manual_items='data/fmo_manual_items', dir_fmo_html_contents='data/fmo_html_contents', dir_fmo_machine_items='data/fmo_machine_items'):
+        self.DIR_DATA_FMO_HTML_CONTENTS = dir_fmo_html_contents
+        self.DIR_DATA_FMO_MACHINE_ITEMS = dir_fmo_machine_items
         self.DIR_DATA_FMO_MANUAL_ITEMS = dir_fmo_manual_items
         self.year = year
         
@@ -175,7 +175,7 @@ class Dashboard:
 
     def get_filename_fmo_machine_items(self, url:str) -> str:
         filename_root = self.get_filename_root(url)
-        filename = f'{cfg.DIR_DATA_FMO_MACHINE_ITEMS}/{filename_root}.csv'
+        filename = f'{self.DIR_DATA_FMO_MACHINE_ITEMS}/{filename_root}.csv'
         return filename
 
     def get_existing_fmo_machine_items(self, url:str) -> str:
@@ -191,7 +191,7 @@ class Dashboard:
         return df
 
     def get_existing_fmo_html_contents(self, url:str) -> str:
-        filename = f'{cfg.DIR_DATA_FMO_HTML_CONTENTS}/{self.get_filename_root(url)}.json'
+        filename = f'{self.DIR_DATA_FMO_HTML_CONTENTS}/{self.get_filename_root(url)}.json'
         if not os.path.exists(filename):
             raise ValueError(f'not yet parse fmo html contents for {url}')
         with io.open(filename, mode='r', encoding='utf-8') as f:
