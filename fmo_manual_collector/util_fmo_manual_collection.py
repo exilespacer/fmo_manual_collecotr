@@ -197,6 +197,13 @@ class Dashboard:
         with io.open(filename, mode='r', encoding='utf-8') as f:
             contents = json.load(f)
         return contents
+    
+    def map_alias_to_fmo(self, alias, fmo):
+        fmo_alias_mapping = self.df_brackets.set_index('alias').fmo.to_dict()
+        if alias != '99':
+            fmo = fmo_alias_mapping.get(alias, None)
+        return fmo 
+
 
 dashboard = Dashboard()
 
