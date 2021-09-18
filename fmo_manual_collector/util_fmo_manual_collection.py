@@ -199,6 +199,7 @@ class Dashboard:
         return contents
     
     def map_alias_to_fmo(self, alias, fmo):
+        assert isinstance(alias, str), 'alias must be string e.g. "3", "99", "-99"'
         fmo_alias_mapping = self.df_brackets.set_index('alias').fmo.to_dict()
         if alias != '99':
             fmo = fmo_alias_mapping.get(alias, None)
