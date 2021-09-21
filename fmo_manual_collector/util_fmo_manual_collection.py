@@ -126,20 +126,20 @@ class Dashboard:
 
     def generator_df_series(self):
         assert not self.df.empty, 'Please run dashboard.set_parameters(year=year, dir_fmo_manual_items="data") first.'        
-        grouped = self.df.groupby(['url', 'series'])
-        grps = list(grouped.groups.keys())
-        while len(grps) > 1:
-            idx = np.random.randint(0, len(grps))
-            url, series = grps.pop(idx)
-            df_series = grouped.get_group((url, series))
-
+        grouped = self.df.groupby('url')
+        urls = list(grouped.groups.keys())
+        while len(urls) > 1:
+            idx = np.random.randint(0, len(urls))
+            url = urls.pop(idx)
             df_fmo_prefilled = self.get_existing_fmo_machine_items(url)
-            df_series = (
-                df_series
-                .drop(columns=['fmo'])
-                .pipe(safe_lmerge, df_right=df_fmo_prefilled, on=['series_name', 'manager_name'])
-            )
-            yield ((url, series), df_series)
+            df_url = grouped.get_group(url)
+            for series, df_series in df_url.groupby('series'):
+                df_series = (
+                    df_series
+                    .drop(columns=['fmo'])
+                    .pipe(safe_lmerge, df_right=df_fmo_prefilled, on=['series_name', 'manager_name'])
+                )
+                yield ((url, series), df_series)
 
     def get_all_fmo_manual_items(self):
         assert self.DIR_DATA_FMO_MANUAL_ITEMS is not None, 'Please run dashboard.set_parameters(dir_fmo_manual_items="data") first. '
