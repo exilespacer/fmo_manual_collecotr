@@ -226,10 +226,19 @@ class SheetUI:
         self.sheet_input = self.load_sheet()
         
         # setup buttons
+        self.series_keywords = self.df_series.series_name.iloc[0].split(' ')
+        self.bool_series_keywords = [False] * len(self.series_keywords)
+        
+        self.row_button = None
+        self.button_refresh = None
+        self.checkboxes_series_keyword = None
         self.set_buttons()
         
         # parameter
         self.has_saved = False
+
+    def update_bool_series_keywords(self):
+        self.bool_series_keywords = list(map(lambda x: x.value, self.checkboxes_series_keyword))
 
     def load_sheet(self):
         # initiate sheet
@@ -252,6 +261,18 @@ class SheetUI:
         # refresh 
         self.button_refresh = widgets.Button(description="Fill fmo")
         self.button_refresh.on_click(self.refresh_fmo)
+
+        # checkboxes of series keywords
+        idx_middle = len(self.series_keywords)//2
+        self.checkboxes_series_keyword = [
+            widgets.Checkbox(
+                value=True if idx == idx_middle else False,
+                description=f'{kw}',
+                disabled= False
+            )
+            for idx, kw in enumerate(self.series_keywords)
+        ]
+
 
     def add_row(self, b):
         self.sheet_input.rows += 1
@@ -276,6 +297,8 @@ class SheetUI:
         display(self.row_button)
         display(self.sheet_input)
         display(self.button_refresh)
+        for checkbox in self.checkboxes_series_keyword:
+            display(checkbox)
     
 
 if __name__ == '__main__':
