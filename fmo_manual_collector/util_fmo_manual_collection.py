@@ -126,14 +126,20 @@ class Dashboard:
 
     def generator_df_series(self):
         assert not self.df.empty, 'Please run dashboard.set_parameters(year=year, dir_fmo_manual_items="data") first.'        
-        for (url, sereis), df_series in self.df.groupby(['url', 'series']):
+        grouped = self.df.groupby(['url', 'series'])
+        grps = list(grouped.groups.keys())
+        while len(grps) > 1:
+            idx = np.random.randint(0, len(grps))
+            url, series = grps.pop(idx)
+            df_series = grouped.get_group((url, series))
+
             df_fmo_prefilled = self.get_existing_fmo_machine_items(url)
             df_series = (
                 df_series
                 .drop(columns=['fmo'])
                 .pipe(safe_lmerge, df_right=df_fmo_prefilled, on=['series_name', 'manager_name'])
             )
-            yield ((url, sereis), df_series)
+            yield ((url, series), df_series)
 
     def get_all_fmo_manual_items(self):
         assert self.DIR_DATA_FMO_MANUAL_ITEMS is not None, 'Please run dashboard.set_parameters(dir_fmo_manual_items="data") first. '
@@ -272,4 +278,14 @@ class SheetUI:
         display(self.button_refresh)
     
 
-    
+if __name__ == '__main__':
+    dashboard.set_parameters(
+        year=2012, 
+        dir_fmo_manual_items='/Users/chiayiyen/Dropbox/fmo_manual_collection/data/fmo_manual_items', 
+        dir_fmo_html_contents='/Users/chiayiyen/Dropbox/fmo_manual_collection/data/fmo_html_contents', 
+        dir_fmo_machine_items='/Users/chiayiyen/Dropbox/fmo_manual_collection/data/fmo_machine_items'
+    )
+    gen_df_series = dashboard.generator_df_series()
+    for x in gen_df_series:
+        print(x)
+    pass
