@@ -126,20 +126,20 @@ class Dashboard:
 
     def generator_df_series(self):
         assert not self.df.empty, 'Please run dashboard.set_parameters(year=year, dir_fmo_manual_items="data") first.'        
-        grouped = self.df.groupby('url')
-        urls = list(grouped.groups.keys())
-        while len(urls) > 1:
-            idx = np.random.randint(0, len(urls))
-            url = urls.pop(idx)
-            df_fmo_prefilled = self.get_existing_fmo_machine_items(url)
-            df_url = grouped.get_group(url)
-            for series, df_series in df_url.groupby('series'):
-                df_series = (
-                    df_series
-                    .drop(columns=['fmo'])
-                    .pipe(safe_lmerge, df_right=df_fmo_prefilled, on=['series_name', 'manager_name'])
-                )
-                yield ((url, series), df_series)
+        urls = self.df.url.unique()
+        for url in urls:
+            yield from self.generator_df_series_by_url(url)
+
+    def generator_df_series_by_url(self, url):
+        df_url = self.df.loc[lambda x: x.url == url]
+        df_fmo_prefilled = self.get_existing_fmo_machine_items(url)
+        for series, df_series in df_url.groupby('series'):
+            df_series = (
+                df_series
+                .drop(columns=['fmo'])
+                .pipe(safe_lmerge, df_right=df_fmo_prefilled, on=['series_name', 'manager_name'])
+            )
+            yield ((url, series), df_series)
 
     def get_all_fmo_manual_items(self):
         assert self.DIR_DATA_FMO_MANUAL_ITEMS is not None, 'Please run dashboard.set_parameters(dir_fmo_manual_items="data") first. '
@@ -308,7 +308,12 @@ if __name__ == '__main__':
         dir_fmo_html_contents='/Users/chiayiyen/Dropbox/fmo_manual_collection/data/fmo_html_contents', 
         dir_fmo_machine_items='/Users/chiayiyen/Dropbox/fmo_manual_collection/data/fmo_machine_items'
     )
-    gen_df_series = dashboard.generator_df_series()
-    for x in gen_df_series:
+    # gen_df_series = dashboard.generator_df_series()
+    # for x in gen_df_series:
+    #     print(x)
+    
+    url = 'https://www.sec.gov/Archives/edgar/data/92500/0000945621-12-000216.txt'
+    gen_df_series_by_url = dashboard.generator_df_series_by_url(url)
+    for x in gen_df_series_by_url:
         print(x)
     pass

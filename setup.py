@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='fmo_manual_collector',
-    version='0.0.6',
+    version='0.0.7',
     description='Collect FMO from EDGAR filinigs',
     url='https://github.com/exilespacer/fmo_manual_collector',
     author='Chia-Yi Yen',
