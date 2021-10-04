@@ -130,8 +130,14 @@ class Dashboard:
         for url in urls:
             yield from self.generator_df_series_by_url(url)
 
-    def generator_df_series_by_url(self, url):
+    def generator_df_series_by_url(self, url, include_done=False):
         df_url = self.df.loc[lambda x: x.url == url]
+        if include_done:
+            df_url = self.get_df_latest_snapshot().loc[lambda x: x.url == url]
+            if df_url.series.isna().any():
+                print(f'[PROB] check why it has empty "series": {url}')
+                df_url = df_url.assign(series = lambda x: x.series.fillna(-99))
+
         df_fmo_prefilled = self.get_existing_fmo_machine_items(url)
         for series, df_series in df_url.groupby('series'):
             df_series = (
@@ -312,8 +318,8 @@ if __name__ == '__main__':
     # for x in gen_df_series:
     #     print(x)
     
-    url = 'https://www.sec.gov/Archives/edgar/data/92500/0000945621-12-000216.txt'
-    gen_df_series_by_url = dashboard.generator_df_series_by_url(url)
+    url = 'https://www.sec.gov/Archives/edgar/data/1004655/0000932471-12-003690.txt'
+    gen_df_series_by_url = dashboard.generator_df_series_by_url(url, include_done=True)
     for x in gen_df_series_by_url:
         print(x)
     pass
