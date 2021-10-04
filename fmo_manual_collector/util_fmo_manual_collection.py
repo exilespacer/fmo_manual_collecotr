@@ -134,18 +134,15 @@ class Dashboard:
         df_url = self.df.loc[lambda x: x.url == url]
         if include_done:
             df_url = self.get_df_latest_snapshot().loc[lambda x: x.url == url]
-            if df_url.series.isna().any():
-                print(f'[PROB] check why it has empty "series": {url}')
-                df_url = df_url.assign(series = lambda x: x.series.fillna(-99))
 
         df_fmo_prefilled = self.get_existing_fmo_machine_items(url)
-        for series, df_series in df_url.groupby('series'):
+        for series_name, df_series in df_url.groupby('series_name'):
             df_series = (
                 df_series
                 .drop(columns=['fmo'])
                 .pipe(safe_lmerge, df_right=df_fmo_prefilled, on=['series_name', 'manager_name'])
             )
-            yield ((url, series), df_series)
+            yield ((url, series_name), df_series)
 
     def get_all_fmo_manual_items(self):
         assert self.DIR_DATA_FMO_MANUAL_ITEMS is not None, 'Please run dashboard.set_parameters(dir_fmo_manual_items="data") first. '
@@ -314,10 +311,7 @@ if __name__ == '__main__':
         dir_fmo_html_contents='/Users/chiayiyen/Dropbox/fmo_manual_collection/data/fmo_html_contents', 
         dir_fmo_machine_items='/Users/chiayiyen/Dropbox/fmo_manual_collection/data/fmo_machine_items'
     )
-    # gen_df_series = dashboard.generator_df_series()
-    # for x in gen_df_series:
-    #     print(x)
-    
+
     url = 'https://www.sec.gov/Archives/edgar/data/1004655/0000932471-12-003690.txt'
     gen_df_series_by_url = dashboard.generator_df_series_by_url(url, include_done=True)
     for x in gen_df_series_by_url:
