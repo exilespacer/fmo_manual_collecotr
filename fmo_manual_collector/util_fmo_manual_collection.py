@@ -247,7 +247,9 @@ class SheetUI:
         # initiate sheet
         df_input = (
             self.df_series
+            .assign(fmo = lambda x: x.fmo.fillna('None'))
             .pipe(safe_lmerge, df_right=dashboard.df_brackets, on=['fmo']) # add alias
+            .assign(fmo = lambda x: x.fmo.replace('None', np.nan))
             .loc[:, ['fyedt', 'series_name', 'manager_name', 'fmo', 'alias']]
         )
         sheet_input = ipysheet.from_dataframe(df_input)
@@ -314,6 +316,8 @@ if __name__ == '__main__':
 
     url = 'https://www.sec.gov/Archives/edgar/data/1004655/0000932471-12-003690.txt'
     gen_df_series_by_url = dashboard.generator_df_series_by_url(url, include_done=True)
-    for x in gen_df_series_by_url:
+    for (url, series), df_series in gen_df_series_by_url:
+        print((url, series), df_series )
+        x = SheetUI(url, series, df_series)
         print(x)
     pass
